@@ -16,6 +16,32 @@ def broadcast_transaction(tx_hex):
   except Exception as e:
     raise ValueError(f"Error broadcasting transaction: {str(e)}")
 
+def get_utxo_index_utxo_amount(utxo_txid, address_received):
+    """Fetch transaction details and extract vin's vout index and value for a specified address."""
+    url = f"https://blockstream.info/testnet/api/tx/{utxo_txid}"
+
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+
+            # Extract "vout" index from "vin"
+            vin_vout_index = data["vin"][0]["vout"]
+
+            # Extract "value" from "vout" where "scriptpubkey_address" matches
+            matching_value = None
+            for vout in data["vout"]:
+                if vout["scriptpubkey_address"] == address_received:
+                    matching_value = vout["value"]
+                    break
+
+            # Return the extracted values
+            return vin_vout_index, matching_value / COIN
+        else:
+            raise ValueError(f"Fetching transaction failed: {response.text}")
+    except Exception as e:
+        raise ValueError(f"Error fetching transaction details: {str(e)}")
+
 def get_transaction_info(txid):
   url = f"https://blockstream.info/testnet/api/tx/{txid}"
   try:
@@ -65,11 +91,12 @@ def spend_locked_funds(sender_priv_key, utxo_txid, utxo_index, utxo_amount, reci
 if __name__ == "__main__":
     sender_priv_key = "cU13K2WaezJtM65mPNBVvMr84QzLUANJcbZuT5yqmCeVMxqm4QNa"
     utxo_txid = "95f0a4ac7fe1b7446b1d165c4ae732803bdbc518d0b1d99badbb928a44d61c14"
-    utxo_index = 0
-    utxo_amount = 0.0001
     recipient_addr = "mkT3YKrMPgchhMy1AVyVvhQbYtFcwr9uJ7"
-    send_amount = 0.00005
     change_address = "moaEaXS2d3ZoPVDWL9vwtMZxL7gURMHJwy"
+    # utxo_index = 0
+    # utxo_amount = 0.0001
+    utxo_index, utxo_amount = get_utxo_index_utxo_amount(utxo_txid, change_address)
+    send_amount = 0.00005
     try:
         raw_tx = spend_locked_funds(sender_priv_key, utxo_txid, utxo_index, utxo_amount, recipient_addr, send_amount, change_address)
         print(f"Raw Transaction: {raw_tx}")
