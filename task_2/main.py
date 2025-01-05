@@ -15,7 +15,6 @@ print("Multisig Address:", multisig_address)
 
 faucet_tx ={
   'utxo_txid': "5f0fbf952c64464c0b5c5c4d06f571e66d3ce958ce99d4027ef9c52bbb5cfcab", 
-  'utxo_index': 1,
 }
 
 start(faucet_tx, sender_1, sender_2, recipient, multisig_address)
