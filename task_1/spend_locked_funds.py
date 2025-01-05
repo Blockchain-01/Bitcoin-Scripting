@@ -28,15 +28,16 @@ def get_utxo_index_utxo_amount(utxo_txid, address_received):
         if response.status_code == 200:
             data = response.json()
 
-            # Extract "vout" index from "vin"
-            vin_vout_index = data["vin"][0]["vout"]
+            vin_vout_index = 0
 
             # Extract "value" from "vout" where "scriptpubkey_address" matches
             matching_value = None
-            for vout in data["vout"]:
-                if vout["scriptpubkey_address"] == address_received:
-                    matching_value = vout["value"]
-                    break
+
+            for i, vout in enumerate(data["vout"]):
+              if str(vout["scriptpubkey_address"]) == str(address_received):
+                matching_value = vout["value"]
+                vin_vout_index = i
+                break
 
             # Return the extracted values
             return vin_vout_index, matching_value / COIN

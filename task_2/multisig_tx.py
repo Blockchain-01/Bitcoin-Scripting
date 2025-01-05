@@ -72,22 +72,23 @@ def get_utxo_index_utxo_amount(utxo_txid, address_received):
         if response.status_code == 200:
             data = response.json()
 
-            # Extract "vout" index from "vin"
-            vin_vout_index = data["vin"][0]["vout"]
+            vin_vout_index = 0
 
             # Extract "value" from "vout" where "scriptpubkey_address" matches
             matching_value = None
-            for vout in data["vout"]:
+
+            for i, vout in enumerate(data["vout"]):
               if str(vout["scriptpubkey_address"]) == str(address_received):
                 matching_value = vout["value"]
+                vin_vout_index = i
                 break
 
-            return vin_vout_index, int(matching_value / COIN)
+            # Return the extracted values
+            return vin_vout_index, matching_value / COIN
         else:
             raise ValueError(f"Fetching transaction failed: {response.text}")
     except Exception as e:
         raise ValueError(f"Error fetching transaction details: {str(e)}")
-
 
 def start(faucet_tx, sender_1, sender_2, recipient, multisig_address):
   try:
