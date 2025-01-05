@@ -63,11 +63,39 @@ def broadcast_tx(tx_hex):
   except Exception as e:
     raise ValueError(f"Error broadcasting transaction: {str(e)}")
 
+def get_utxo_index_utxo_amount(utxo_txid, address_received):
+    """Fetch transaction details and extract vin's vout index and value for a specified address."""
+    url = f"https://blockstream.info/testnet/api/tx/{utxo_txid}"
+
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+
+            # Extract "vout" index from "vin"
+            vin_vout_index = data["vin"][0]["vout"]
+
+            # Extract "value" from "vout" where "scriptpubkey_address" matches
+            matching_value = None
+            for vout in data["vout"]:
+                if vout["scriptpubkey_address"] == address_received:
+                    matching_value = vout["value"]
+                    break
+
+            # Return the extracted values
+            return vin_vout_index, matching_value / COIN
+        else:
+            raise ValueError(f"Fetching transaction failed: {response.text}")
+    except Exception as e:
+        raise ValueError(f"Error fetching transaction details: {str(e)}")
 
 
 def start(faucet_tx, sender_1, sender_2, recipient, multisig_address):
   try:
-    txin = create_txin(faucet_tx['utxo_txid'], faucet_tx['utxo_index'])
+    utxo_txid = faucet_tx['utxo_txid']
+    utxo_index, utxo_amount = get_utxo_index_utxo_amount(utxo_txid, multisig_address)
+    txin = create_txin(utxo_txid, utxo_index)
+
     total_amount = 0.00027602
     recipient_amount = 0.0002
     change_amount = total_amount - recipient_amount - 0.00001
