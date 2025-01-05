@@ -7,23 +7,6 @@ from bitcoin.core.key import CPubKey
 import requests
 
 def broadcast_transaction(tx_hex):
-  url = "https://blockstream.info/testnet/api/tx"
-  headers = {'Content-Type': 'text/plain'}
-    
-  try:
-    response = requests.post(url, data=tx_hex, headers=headers)
-    if response.status_code == 200:
-      return response.text
-    else:
-      print(f"Response status: {response.status_code}")
-      print(f"Response body: {response.text}")
-      raise ValueError(f"Broadcasting failed: {response.text}")
-  except Exception as e:
-    raise ValueError(f"Error broadcasting transaction: {str(e)}")
-
-  url = "https://blockstream.info/testnet/api/tx"
-  headers = {'Content-Type': 'text/plain'}
-  
   try:
     response = requests.post(url, data=tx_hex, headers=headers)
     if response.status_code == 200:
