@@ -7,6 +7,9 @@ from bitcoin.core.key import CPubKey
 import requests
 
 def broadcast_transaction(tx_hex):
+  url = "https://blockstream.info/testnet/api/tx"
+  headers = {'Content-Type': 'text/plain'}
+
   try:
     response = requests.post(url, data=tx_hex, headers=headers)
     if response.status_code == 200:
