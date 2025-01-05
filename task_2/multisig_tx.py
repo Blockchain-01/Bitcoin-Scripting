@@ -78,12 +78,11 @@ def get_utxo_index_utxo_amount(utxo_txid, address_received):
             # Extract "value" from "vout" where "scriptpubkey_address" matches
             matching_value = None
             for vout in data["vout"]:
-                if vout["scriptpubkey_address"] == address_received:
-                    matching_value = vout["value"]
-                    break
+              if str(vout["scriptpubkey_address"]) == str(address_received):
+                matching_value = vout["value"]
+                break
 
-            # Return the extracted values
-            return vin_vout_index, matching_value / COIN
+            return vin_vout_index, int(matching_value / COIN)
         else:
             raise ValueError(f"Fetching transaction failed: {response.text}")
     except Exception as e:
@@ -96,8 +95,8 @@ def start(faucet_tx, sender_1, sender_2, recipient, multisig_address):
     utxo_index, utxo_amount = get_utxo_index_utxo_amount(utxo_txid, multisig_address)
     txin = create_txin(utxo_txid, utxo_index)
 
-    total_amount = 0.00027602
-    recipient_amount = 0.0002
+    total_amount = utxo_amount
+    recipient_amount = utxo_amount / 2
     change_amount = total_amount - recipient_amount - 0.00001
 
     redeem_script = get_redeem_script(sender_1['public_key'], sender_2['public_key'])

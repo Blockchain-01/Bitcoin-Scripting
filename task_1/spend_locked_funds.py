@@ -99,7 +99,7 @@ if __name__ == "__main__":
     # utxo_index = 0
     # utxo_amount = 0.0001
     utxo_index, utxo_amount = get_utxo_index_utxo_amount(utxo_txid, change_address)
-    send_amount = 0.00005
+    send_amount = utxo_amount / 2
     try:
         raw_tx = spend_locked_funds(sender_priv_key, utxo_txid, utxo_index, utxo_amount, recipient_addr, send_amount, change_address)
         print(f"Raw Transaction: {raw_tx}")
